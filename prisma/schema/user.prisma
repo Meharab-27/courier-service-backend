@@ -1,0 +1,19 @@
+model User {
+  id         String    @id @default(uuid())
+  name       String    @db.VarChar(100)
+  email      String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  phone      String?   @unique @db.VarChar(20)
+  role       Role      @default(CUSTOMER)
+  avatarUrl  String?   @db.VarChar(500)
+  isVerified Boolean   @default(false)
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  customer Customer?
+
+  @@index([email, role])
+  @@index([deletedAt])
+  @@map("users")
+}
