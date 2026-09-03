@@ -10,7 +10,7 @@ router.post(
   validateRequest(authValidation.customerRegistrationZodSchema),
   authController.registerUser
 );
-router.post("/login", authController.loginUser);
+router.post("/login", validateRequest(authValidation.loginZodSchema), authController.loginUser);
 router.post("/refresh-token", authController.refreshToken);
 
 router.post("/google", authController.googleLogin);

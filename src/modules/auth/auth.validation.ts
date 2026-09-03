@@ -18,6 +18,19 @@ export const customerRegistrationZodSchema = z.object({
     }).optional()
 });
 
+
+
+const loginZodSchema = z.object({
+    email : z.email(),
+    password : z.string()
+                   .min(8, "Password Must Minimum 8 Characters Long")
+                   .regex(/[a-z]/, "Password must contain at least 1 Number")
+                    .regex(/[A-Z]/, "Password must contain atleast 1 Uppercase Letter")
+                  .regex(/[0-9]/,"Password must contain atleast 1 Number")
+                  .regex(/[^a-zA-Z0-9]/,"Password must contain atleast 1 Special Character"),
+})
+
 export const authValidation = {
   customerRegistrationZodSchema,
+  loginZodSchema
 };
