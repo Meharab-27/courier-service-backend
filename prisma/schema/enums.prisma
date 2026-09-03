@@ -3,3 +3,16 @@ enum Role {
   COURIER
   ADMIN
 }
+
+enum AuthProvider {
+  GOOGLE 
+  CREDENTIAL
+}
+
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  BLOCKED
+  DELETED
+}
