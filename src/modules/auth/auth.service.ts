@@ -60,6 +60,8 @@ const registerUser = async (payload: IRegisterUserPayload) => {
       await tx.customer.create({
         data: {
           userId: createdUser.id,
+          name,
+          email,
           defaultAddress,
           city,
           district,
