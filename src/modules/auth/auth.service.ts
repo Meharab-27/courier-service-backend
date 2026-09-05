@@ -4,10 +4,15 @@ import { AuthProvider, Role, UserStatus } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import { jwtUtils } from "../../utils/jwt";
-import { IGoogleLoginPayload, ILoginUserPayload, IRegisterUserPayload } from "./auth.interface";
+import { IForgotPasswordPayload, IGoogleLoginPayload, ILoginUserPayload, IRegisterUserPayload, IResetPasswordPayload } from "./auth.interface";
 import { googleClient } from "../../lib/googleAuth";
 import { TokenPayload } from "google-auth-library";
-import httpStatus from "http-status"
+import httpStatus from "http-status";
+import crypto from "crypto"
+import { redisClient } from "../../lib/redis";
+import path from "path"
+import ejs from "ejs"
+import { transporter } from "../../lib/nodemailer";
 
 const registerUser = async (payload: IRegisterUserPayload) => {
   const {
@@ -86,6 +91,9 @@ const registerUser = async (payload: IRegisterUserPayload) => {
   }
 
   const { password: _, ...userWithoutPassword } = result;
+
+
+
   return userWithoutPassword;
 };
 
@@ -278,9 +286,156 @@ const googleLogin = async (payload: IGoogleLoginPayload) => {
   };
 };
 
+const forgotPassword = async(payload :IForgotPasswordPayload) =>{
+  const {email} = payload;
+
+  const isUserExist = await prisma.user.findUnique({
+    where : {
+      email
+    }
+  })
+
+
+  if(!isUserExist){
+    throw new Error("User Does Not Exist")
+  }
+
+  if(isUserExist.status === "BLOCKED"){
+    throw new Error("User Does Not Exist")
+  }
+
+  if(!isUserExist.emailVerified){
+    throw new Error("User Not Verified")
+  }
+
+  if(isUserExist.isDeleted || isUserExist.status === "DELETED"){
+    throw new Error("User Is Deleted")
+  }
+
+  if(isUserExist.googleId && isUserExist.authProvider === "GOOGLE"){
+    throw new Error("User Has Account With Google ")
+  }
+
+   const otp = crypto.randomInt(100000, 1000000).toString();
+
+   const key = `forget-password-otp:${isUserExist.email}`
+
+    const expirationSeconds = 3 * 60
+
+     await redisClient.set(key, otp, {
+		expiration: {
+			type:"EX",
+			value: expirationSeconds
+		}
+	 })
+
+   const templatePath = path.join(process.cwd(), "src/templates/forgot-password.ejs");
+
+   const templateData = {
+    name : isUserExist.name,
+    otp,
+    expirationMinutes : expirationSeconds / 60
+   }
+
+   const html = await ejs.renderFile(templatePath,templateData)
+
+
+   await transporter.sendMail({
+    from: config.email_sender,
+    to: isUserExist.email,
+    subject:"forgot Password",
+    html
+   })
+
+   
+
+
+
+}
+
+
+const resetPassword = async(payload : IResetPasswordPayload) =>{
+  const {email, otp, newPassword} = payload;
+
+  const isUserExist = await prisma.user.findUnique({
+    where : {
+      email
+    }
+  })
+
+
+  if(!isUserExist){
+    throw new Error("User Does Not Exist");
+  }
+
+  if(isUserExist.status === "BLOCKED"){
+    throw new Error("User Is Blocked")
+  }
+
+  if(!isUserExist.emailVerified){
+    throw new Error("User Not Verified");
+  }
+
+  if(isUserExist.isDeleted || isUserExist.status === "DELETED"){
+    throw new Error("User Is Deleted");
+  }
+
+  if(isUserExist.googleId && isUserExist.authProvider === "GOOGLE"){
+    throw new Error("User Has Account With Google ");
+  }
+
+  const key = `forgot-password-otp: ${isUserExist.email}`
+
+  const redisOtp = await redisClient.get(key);
+
+  if(!redisOtp){
+    throw new Error("Invalid OTP")
+  }
+
+  if(redisOtp !== otp){
+    throw new Error("OTP Does Not Match");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
+
+  await prisma.user.update({
+    where : {
+      email : isUserExist.email
+    },
+    data : {
+      password:hashedPassword
+    }
+  });
+
+  await redisClient.del([key])
+
+  const templatePath = path.join(process.cwd(), "src/templates/reset-password-success.ejs")
+
+  const templateData = {
+    name : isUserExist.name
+  }
+
+  const html =  await ejs.renderFile(templatePath, templateData)
+
+  await transporter.sendMail({
+    from : config.email_sender,
+    to : isUserExist.email,
+    subject: "Password Changed",
+    html
+  })
+
+
+
+
+}
+
+
+
 export const authService = {
   registerUser,
   loginUser,
   refreshToken,
-  googleLogin
+  googleLogin,
+  forgotPassword,
+  resetPassword
 };
