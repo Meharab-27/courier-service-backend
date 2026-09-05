@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma";
 import { generateHubCode } from "../../utils/hub";
-import { ICreateHubPayload, IHubFilterOptions } from "./hub.interface";
+
+import { ICreateHubPayload, IHubFilterOptions, IUpdateHubPayload } from "./hub.interface";
 
 
 const createHubIntoDB = async(payload : ICreateHubPayload) =>{
@@ -95,6 +96,27 @@ export const getHubByIdFromDB = async (id: string) => {
   return hub;
 };
 
+const updateHubInDB = async(id : string,payload: IUpdateHubPayload)=>{
+  const hub = await prisma.hub.findFirst({
+    where : {
+      id ,
+      deletedAt: null
+    }
+  })
+
+  if(!hub){
+    throw new Error("Hub Not Founded")
+  }
+
+  return await prisma.hub.update({
+    where : {id},
+    data : payload
+  })
+
+
+
+}
+
 
 
 
@@ -102,5 +124,6 @@ export const getHubByIdFromDB = async (id: string) => {
 export const hubService = {
     createHubIntoDB,
     getAllHubsFromDB,
-    getHubByIdFromDB
+    getHubByIdFromDB,
+    updateHubInDB
 }

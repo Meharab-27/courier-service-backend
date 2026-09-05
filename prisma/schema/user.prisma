@@ -21,6 +21,10 @@ model User {
 
   customer Customer?
 
+  assignedShipments  Shipment[]
+
+  performedLogs      ShipmentLog[]
+
   @@index([email, role])
   @@index([deletedAt])
   @@map("users")

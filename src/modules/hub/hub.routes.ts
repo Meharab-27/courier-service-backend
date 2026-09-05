@@ -11,6 +11,7 @@ router.get('/',hubController.getAllHubs);
 
 
 router.get('/:id',hubController.getHubById)
+router.patch('/:id',hubController.updateHub)
 
 
 

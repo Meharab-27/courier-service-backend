@@ -51,10 +51,31 @@ const getHubById = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+export const updateHub = catchAsync(async (req: Request, res: Response) => {
+
+  const {id} = req.params;
+
+  if(!id || Array.isArray(id)){
+    throw new Error("Invalid Hub Id")
+  }
+  const result = await hubService.updateHubInDB( id,req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'হাব তথ্য সফলভাবে আপডেট হয়েছে',
+    data: result,
+  });
+});
+
+
+
+
+
 
 
 export const hubController = {
     createHub,
     getAllHubs,
-    getHubById
+    getHubById,
+    updateHub
 }

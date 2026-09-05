@@ -14,8 +14,8 @@ model Hub {
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
-// originShipments      Shipment[] @relation("OriginHubShipments")
-//   destinationShipments Shipment[] @relation("DestinationHubShipments")
+originShipments      Shipment[] @relation("OriginHubShipments")
+  destinationShipments Shipment[] @relation("DestinationHubShipments")
 
   @@index([code, zone])
   @@index([deletedAt])
