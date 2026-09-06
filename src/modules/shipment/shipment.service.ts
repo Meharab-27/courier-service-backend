@@ -123,10 +123,110 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
 }
 
 
- const getAllShipmentsFromDB = async(user: RequestUser, filters:ICreateShipmentPayload) =>{
-    
+ const getAllShipmentsFromDB = async(user: RequestUser, filters:IShipmentFilterOptions) =>{
+    if (!user || !user.role) {
+        throw new Error("You are not authorized. Please log in to access this resource.");
+    }
+
+    const page = Number(filters.page) || 1;
+    const limit = Number(filters.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const {status,searchTerm,sortBy = 'createdAt',sortOrder='desc'} = filters;
+
+
+    const andConditions : any[] = [{deletedAt : null}];
+
+    if (user.role === 'CUSTOMER') {
+    const customer = await prisma.customer.findUnique({ where: { userId: user.userId } });
+    andConditions.push({ customerId: customer?.id || 'NO_ACCESS' });
+  } else if (user.role === 'COURIER') {
+    andConditions.push({ courierId: user.userId });
+  }
+
+
+  if(status) {
+    andConditions.push({status});
+  }
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: [
+        { trackingNumber: { contains: searchTerm, mode: 'insensitive' } },
+        { receiverPhone: { contains: searchTerm, mode: 'insensitive' } },
+        { receiverName: { contains: searchTerm, mode: 'insensitive' } },
+      ],
+    });
+  };
+
+  const whereConditions = { AND: andConditions };
+
+  const [shipments, total] = await Promise.all([
+    prisma.shipment.findMany({
+      where: whereConditions,
+      skip,
+      take: limit,
+      orderBy: { [sortBy]: sortOrder },
+      include: {
+        originHub: { select: { name: true, code: true } },
+        destinationHub: { select: { name: true, code: true } },
+      },
+    }),
+    prisma.shipment.count({ where: whereConditions }),
+  ]);
+
+
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+    data: shipments,
+  };
+ }
+
+
+ const getShipmentByIdFromDB = async(user:RequestUser,shipmentId: string) =>{
+
+    if (!user || !user.role) {
+        throw new Error("You are not authorized. Please log in to access this resource.");
+    }
+
+    const shipment = await prisma.shipment.findFirst({
+      where : {
+        id : shipmentId,
+        deletedAt:null
+      },
+      include : {
+        originHub:true,
+        destinationHub:true,
+        customer: { select: { name: true, email: true, alternatePhone: true } },
+      statusLogs: {
+        orderBy: { createdAt: 'asc' },
+        include: { performedBy: { select: { name: true, role: true } } },
+      }}
+    });
+
+    if(!shipment){
+      throw new Error("The Shipment Not Found")
+    }
+
+    if (user.role === 'CUSTOMER') {
+    const customer = await prisma.customer.findUnique({ where: { userId: user.userId } });
+    if (!customer || shipment.customerId !== customer.id) {
+      throw new Error('Unauthorized Access');
+    }
+  }
+
+ return shipment
+
  }
 export const shipmentService = {
     calculateShipmentPriceFromDB,
-    createShipmentIntoDB
+    createShipmentIntoDB,
+    getAllShipmentsFromDB,
+    getShipmentByIdFromDB
 }

@@ -31,7 +31,38 @@ export const createShipment = catchAsync(async (req: Request, res: Response) => 
   });
 });
 
+
+
+export const getAllShipments = catchAsync(async (req: Request, res: Response) => {
+  const result = await shipmentService.getAllShipmentsFromDB(req.user!, req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Shipment List Get Successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+
+const getShipmentById = catchAsync(async (req: Request, res: Response) => {
+
+  const {id} = req.params;
+  if(!id || Array.isArray(id)){
+    throw new Error("Shipment Id Is Required")
+  }
+  const result = await shipmentService.getShipmentByIdFromDB(req.user!,id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'The Shipment Data Found ',
+    data: result,
+  });
+});
+
 export const shipmentController = {
     calculatePrice,
-    createShipment
+    createShipment,
+    getAllShipments,
+    getShipmentById
 }

@@ -8,6 +8,19 @@ const router = Router();
 
 router.post('/calculate-price', shipmentController.calculatePrice)
 
+
 router.post('/create-shipment', auth(Role.CUSTOMER), shipmentController.createShipment)
+
+
+
+router.get('/get-all-shipments', auth(Role.ADMIN, Role.CUSTOMER, Role.COURIER), shipmentController.getAllShipments)
+
+router.get(
+  "/:id",
+  auth(Role.CUSTOMER, Role.ADMIN, Role.COURIER),
+  shipmentController.getShipmentById
+);
+
+
 
 export const shipmentRoutes = router
