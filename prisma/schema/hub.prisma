@@ -1,14 +1,14 @@
 model Hub {
   id                   String     @id @default(uuid())
   name                 String     @db.VarChar(150)
-  code                 String     @unique @db.VarChar(20) // e.g. "HUB-KHU-01", "HUB-DHK-01"
+  code                 String     @unique @db.VarChar(20) // e.g. 
   address              String     @db.Text
-  zone                 String     @db.VarChar(100)        // e.g. "Khulna Division", "Dhaka Metro"
+  zone                 String     @db.VarChar(100)        // e.g. 
   contactNo            String     @db.VarChar(20)
   latitude             Float?
   longitude            Float?
 
-  // সফট ডিলিটের জন্য
+
   deletedAt            DateTime?
 
   createdAt            DateTime   @default(now())

@@ -1,45 +1,9 @@
-export interface ICalculatePricePayload {
-  originHubId: string;
-  destinationHubId: string;
-  weightKg: number;
-  lengthCm: number;
-  widthCm: number;
-  heightCm: number;
-  isFragile?: boolean;
-}
+import { Router } from "express";
+import { shipmentController } from "./shipment.controller";
+
+const router = Router();
 
 
-export interface ICreateShipmentPayload {
-  originHubId: string;
-  destinationHubId: string;
-  senderName: string;
-  senderPhone: string;
-  senderAddress: string;
-  receiverName: string;
-  receiverPhone: string;
-  receiverAddress: string;
-  weightKg: number;
-  lengthCm: number;
-  widthCm: number;
-  heightCm: number;
-  isFragile?: boolean;
-  deliveryNotes?: string;
-}
+router.post('/calculate-price', shipmentController.calculatePrice)
 
-
-export interface IUpdateShipmentPayload {
-  receiverName?: string;
-  receiverPhone?: string;
-  receiverAddress?: string;
-  deliveryNotes?: string;
-}
-
-
-export interface IShipmentFilterOptions {
-  status?: string;
-  searchTerm?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-}
+export const shipmentRoutes = router

@@ -6,15 +6,24 @@ import config from "../config";
 import { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
 
+
+
+
+
+export interface RequestUser {
+  
+        email: string;
+        name: string;
+        userId: string;
+        role: Role;
+      
+}
+
+
 declare global {
   namespace Express {
     interface Request {
-      user?: {
-        email: string;
-        name: string;
-        id: string;
-        role: Role;
-      };
+      user?: RequestUser
     }
   }
 }
@@ -58,7 +67,7 @@ export const auth = (...requiredRoles: Role[]) => {
     req.user = {
       email: user.email,
       name: user.name,
-      id: user.id,
+      userId: user.id,
       role: user.role,
     };
 

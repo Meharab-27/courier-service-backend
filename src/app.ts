@@ -8,6 +8,7 @@ import { userRoutes } from "./modules/user/user.routes";
 import { customerRoutes } from "./modules/customer/customer.routes";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { hubRoutes } from "./modules/hub/hub.routes";
+import { shipmentRoutes } from "./modules/shipment/shipment.route";
 
 const app: Application = express();
 
@@ -35,6 +36,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/hubs",hubRoutes);
+app.use("/api/shipments",shipmentRoutes)
 
 // 404 Route Handler
 app.use((req: Request, res: Response) => {
