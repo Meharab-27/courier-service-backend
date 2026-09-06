@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { RequestUser } from "../../middlewares/auth";
-import { ICalculatePricePayload, ICreateShipmentPayload } from "./shipment.interface";
+import { ICalculatePricePayload, ICreateShipmentPayload, IShipmentFilterOptions } from "./shipment.interface";
 import { computeShipmentCost, generateTrackingNumber } from "./shipment.utils";
 
 
@@ -35,6 +35,10 @@ const calculateShipmentPriceFromDB = async(payload: ICalculatePricePayload)=>{
 
 
 const createShipmentIntoDB = async(user : RequestUser,payload:ICreateShipmentPayload) =>{
+    if (!user || !user.userId) {
+        throw new Error("You are not authorized. Please log in to access this resource.");
+    }
+
     const customer = await prisma.customer.findUnique({
         where : {
             userId : user.userId
@@ -101,10 +105,27 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
         destinationHub: { select: { name: true, code: true, zone: true } },
       },
 
+    });
+
+    await tx.shipmentLog.create({
+        data : {
+            shipmentId : shipment.id,
+            fromStatus : 'ORDER_PLACED',
+            toStatus : 'PAYMENT_PENDING',
+            performedById :user.userId,
+            remarks : 'Parcel Has Been Booked...It Is Waiting For Payment'
+        }
     })
+
+    return shipment
    })
+
 }
 
+
+
+
 export const shipmentService = {
-    calculateShipmentPriceFromDB
+    calculateShipmentPriceFromDB,
+    createShipmentIntoDB
 }

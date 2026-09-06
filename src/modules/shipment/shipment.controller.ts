@@ -16,6 +16,22 @@ const calculatePrice = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+export const createShipment = catchAsync(async (req: Request, res: Response) => {
+
+  const user = req.user!
+   const payload = req.body
+
+  const result = await shipmentService.createShipmentIntoDB(user, payload);
+  sendResponse(res, {
+    statusCode: 201,
+    success: true,
+    message: 'Parcel Has Been Booked Successfully.Please Pay For the Shipment',
+    data: result,
+  });
+});
+
 export const shipmentController = {
-    calculatePrice
+    calculatePrice,
+    createShipment
 }

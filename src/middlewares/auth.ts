@@ -11,12 +11,11 @@ import { prisma } from "../lib/prisma";
 
 
 export interface RequestUser {
-  
-        email: string;
-        name: string;
-        userId: string;
-        role: Role;
-      
+  id: string;
+  email: string;
+  name: string;
+  userId: string;
+  role: Role;
 }
 
 
@@ -61,10 +60,11 @@ export const auth = (...requiredRoles: Role[]) => {
     }
 
     if (user.deletedAt) {
-      throw new Error("Your account has been deleted or deactivated. Please contact support.");
+      throw new Error("Your account has been deactivated. Please contact support.");
     }
 
     req.user = {
+      id: user.id,
       email: user.email,
       name: user.name,
       userId: user.id,
