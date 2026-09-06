@@ -19,7 +19,7 @@ router.get(
   "/:id",
   auth(Role.CUSTOMER, Role.ADMIN, Role.COURIER),
   shipmentController.getShipmentById
-);
+)
 
 
 
