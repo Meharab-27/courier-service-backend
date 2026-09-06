@@ -123,8 +123,9 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
 }
 
 
-
-
+ const getAllShipmentsFromDB = async(user: RequestUser, filters:ICreateShipmentPayload) =>{
+    
+ }
 export const shipmentService = {
     calculateShipmentPriceFromDB,
     createShipmentIntoDB
