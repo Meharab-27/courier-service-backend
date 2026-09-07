@@ -23,7 +23,9 @@ router.get(
 
 router.patch('/:id',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.updateShipment)
 
-router.post('/:id/cancel',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.cancelShipment)
+router.post('/:id/cancel',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.cancelShipment);
+
+router.delete('/:id',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.deleteShipment)
 
 
 

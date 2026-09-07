@@ -309,11 +309,42 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
  }
 
 
+
+ const softDeleteShipmentInDB = async(user :RequestUser,shipmentId:string)=>{
+
+
+   const shipment = await prisma.shipment.findFirst({
+    where : {
+      id : shipmentId,
+      deletedAt: null
+    }
+  });
+
+  if(!shipment){
+    throw new Error("Shipment Not Found");
+  }
+
+   if (!['ORDER_PLACED', 'PAYMENT_PENDING', 'PAID'].includes(shipment.status)) {
+    throw new Error(`This Parcel Is '${shipment.status}' In Condition, You Cannot Cancel It।`);
+  }
+
+  await prisma.shipment.update({
+    where : {id :shipmentId},
+    data : {
+      deletedAt: new Date()
+    }
+  });
+  return null
+
+ }
+
+
 export const shipmentService = {
     calculateShipmentPriceFromDB,
     createShipmentIntoDB,
     getAllShipmentsFromDB,
     getShipmentByIdFromDB,
     updateShipmentInDB,
-    cancelShipmentInDB
+    cancelShipmentInDB,
+    softDeleteShipmentInDB
 }

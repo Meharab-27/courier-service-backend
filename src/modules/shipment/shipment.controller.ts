@@ -90,6 +90,20 @@ const cancelShipment= catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const deleteShipment= catchAsync(async (req: Request, res: Response) => {
+
+  const {id} = req.params;
+  if(!id || Array.isArray(id)){
+    throw new Error("Shipment Id Is Required")
+  }
+  const result = await shipmentService.softDeleteShipmentInDB(req.user!,id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Shipment Cancelled Successfully',
+    data: result,
+  });
+});
 
 export const shipmentController = {
     calculatePrice,
@@ -97,5 +111,6 @@ export const shipmentController = {
     getAllShipments,
     getShipmentById,
     updateShipment,
-    cancelShipment
+    cancelShipment,
+    deleteShipment
 }
