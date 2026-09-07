@@ -21,6 +21,8 @@ router.get(
   shipmentController.getShipmentById
 )
 
+router.patch('/:id',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.updateShipment)
+
 
 
 export const shipmentRoutes = router

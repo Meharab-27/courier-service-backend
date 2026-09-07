@@ -59,10 +59,26 @@ const getShipmentById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updateShipment = catchAsync(async (req: Request, res: Response) => {
+
+  const {id} = req.params;
+  if(!id || Array.isArray(id)){
+    throw new Error("Shipment Id Is Required")
+  }
+  const payload = req.body
+  const result = await shipmentService.updateShipmentInDB(req.user!,id,payload);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Shipment Updated Successfully',
+    data: result,
+  });
+});
 
 export const shipmentController = {
     calculatePrice,
     createShipment,
     getAllShipments,
-    getShipmentById
+    getShipmentById,
+    updateShipment
 }

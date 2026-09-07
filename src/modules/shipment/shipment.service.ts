@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma";
 import { RequestUser } from "../../middlewares/auth";
-import { ICalculatePricePayload, ICreateShipmentPayload, IShipmentFilterOptions } from "./shipment.interface";
+import { ICalculatePricePayload, ICreateShipmentPayload, IShipmentFilterOptions, IUpdateShipmentPayload } from "./shipment.interface";
 import { computeShipmentCost, generateTrackingNumber } from "./shipment.utils";
 
 
@@ -224,9 +224,48 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
  return shipment
 
  }
+
+
+ const updateShipmentInDB = async(user :RequestUser,shipmentId:string,payload:IUpdateShipmentPayload)=>{
+
+  const shipment = await prisma.shipment.findFirst({
+    where : {
+      id : shipmentId,
+      deletedAt:null
+    }
+  });
+
+  if(!shipment){
+    throw new Error("Shipment Not Found")
+  }
+
+  if (user.role === 'CUSTOMER') {
+    const customer = await prisma.customer.findUnique({ where: { userId: user.userId } });
+    if (!customer || shipment.customerId !== customer.id) {
+      throw new Error('UnAuthorized Access');
+    }
+  }
+
+  if (!['ORDER_PLACED', 'PAYMENT_PENDING', 'PAID'].includes(shipment.status)) {
+    throw new Error('Data Cannot Change During The Shipment');
+  }
+
+  return await prisma.shipment.update({
+    where : {
+      id :shipmentId
+    },
+    data: payload
+  })
+
+
+
+ }
+
+
 export const shipmentService = {
     calculateShipmentPriceFromDB,
     createShipmentIntoDB,
     getAllShipmentsFromDB,
-    getShipmentByIdFromDB
+    getShipmentByIdFromDB,
+    updateShipmentInDB
 }
