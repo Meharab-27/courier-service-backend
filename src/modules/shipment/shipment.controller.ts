@@ -75,10 +75,27 @@ const updateShipment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const cancelShipment= catchAsync(async (req: Request, res: Response) => {
+
+  const {id} = req.params;
+  if(!id || Array.isArray(id)){
+    throw new Error("Shipment Id Is Required")
+  }
+  const result = await shipmentService.getShipmentByIdFromDB(req.user!,id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Shipment Cancelled Successfully',
+    data: result,
+  });
+});
+
 export const shipmentController = {
     calculatePrice,
     createShipment,
     getAllShipments,
     getShipmentById,
-    updateShipment
+    updateShipment,
+    cancelShipment
 }

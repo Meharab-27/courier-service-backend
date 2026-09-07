@@ -262,10 +262,58 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
  }
 
 
+ const cancelShipmentInDB = async(user :RequestUser,shipmentId:string)=>{
+  const shipment = await prisma.shipment.findFirst({
+    where : {
+      id : shipmentId,
+      deletedAt: null
+    }
+  });
+
+  if(!shipment){
+    throw new Error("Shipment Not Found");
+  }
+
+  if(user.role === "CUSTOMER"){
+    const customer = await prisma.customer.findUnique({
+      where : {userId: user.userId}
+    });
+    if(!customer || shipment.customerId === customer.id){
+      throw new Error("Unauthorized Access")
+    }
+  }
+
+
+  if (!['ORDER_PLACED', 'PAYMENT_PENDING', 'PAID'].includes(shipment.status)) {
+    throw new Error(`This Parcel Is '${shipment.status}' In Condition, You Cannot Cancel It।`);
+  }
+
+
+  return await prisma.$transaction(async(tx)=>{
+    const updated = await tx.shipment.update({
+      where : {id :shipmentId},
+      data : {status: 'CANCELLED'}
+    });
+
+    await tx.shipmentLog.create({
+      data : {
+        shipmentId,
+        fromStatus:shipment.status,
+        toStatus: 'CANCELLED',
+        performedById:user.userId,
+        remarks : 'Customer Cancel The Parcel By His Own'
+      }
+    });
+    return updated
+  })
+ }
+
+
 export const shipmentService = {
     calculateShipmentPriceFromDB,
     createShipmentIntoDB,
     getAllShipmentsFromDB,
     getShipmentByIdFromDB,
-    updateShipmentInDB
+    updateShipmentInDB,
+    cancelShipmentInDB
 }
