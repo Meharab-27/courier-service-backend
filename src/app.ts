@@ -9,6 +9,8 @@ import { customerRoutes } from "./modules/customer/customer.routes";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import { hubRoutes } from "./modules/hub/hub.routes";
 import { shipmentRoutes } from "./modules/shipment/shipment.route";
+import { paymentController } from "./modules/payment/payment.controller";
+import { paymentRoutes } from "./modules/payment/payment.route";
 
 const app: Application = express();
 
@@ -17,6 +19,13 @@ app.use(
     origin: config.app_url || "*",
     credentials: true,
   })
+);
+
+
+app.post(
+  ['/api/v1/payments/webhook', '/api/payments/webhook'],
+  express.raw({ type: 'application/json' }),
+  paymentController.stripeWebhookHandler
 );
 
 app.use(express.json());
@@ -36,7 +45,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/hubs",hubRoutes);
-app.use("/api/shipments",shipmentRoutes)
+app.use("/api/shipments",shipmentRoutes);
+app.use('/api/payments',paymentRoutes)
 
 // 404 Route Handler
 app.use((req: Request, res: Response) => {

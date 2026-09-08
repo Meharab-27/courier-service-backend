@@ -57,6 +57,8 @@ model Shipment {
 
   statusLogs         ShipmentLog[]
 
+  payments           Payment[]
+
   @@index([trackingNumber])
   @@index([customerId, status])
   @@index([courierId, status])

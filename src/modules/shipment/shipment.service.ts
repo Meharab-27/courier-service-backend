@@ -95,7 +95,7 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
             chargeableWeightKg:priceDetails.chargeableWeightKg,
             baseFare : priceDetails.baseFare,
             surcharge : priceDetails.surcharge,
-            totalCost:priceDetails.surcharge,
+            totalCost:priceDetails.totalCost,
             status:'PAYMENT_PENDING',
             deliveryNotes:payload.deliveryNotes || null
 

@@ -25,6 +25,8 @@ model User {
 
   performedLogs      ShipmentLog[]
 
+  payments Payment[]
+
   @@index([email, role])
   @@index([deletedAt])
   @@map("users")

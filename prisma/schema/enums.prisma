@@ -31,3 +31,17 @@ enum ShipmentStatus {
   CANCELLED          
   RETURNED_TO_SENDER 
 }
+
+
+enum PaymentStatus {
+  PENDING      
+  SUCCESS      
+  FAILED       
+  CANCELLED    
+}
+
+enum PaymentGateway {
+  STRIPE
+  BKASH
+  SSLCOMMERZ
+}
