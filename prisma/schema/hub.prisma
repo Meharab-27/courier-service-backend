@@ -17,6 +17,8 @@ model Hub {
 originShipments      Shipment[] @relation("OriginHubShipments")
   destinationShipments Shipment[] @relation("DestinationHubShipments")
 
+  couriers            CourierProfile[]
+
   @@index([code, zone])
   @@index([deletedAt])
   @@map("hubs")

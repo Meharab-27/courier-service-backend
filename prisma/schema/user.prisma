@@ -27,6 +27,8 @@ model User {
 
   payments Payment[]
 
+  courierProfile          CourierProfile?
+
   @@index([email, role])
   @@index([deletedAt])
   @@map("users")

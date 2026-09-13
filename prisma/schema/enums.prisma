@@ -45,3 +45,10 @@ enum PaymentGateway {
   BKASH
   SSLCOMMERZ
 }
+
+enum VehicleType {
+  BICYCLE   
+  MOTORBIKE
+  VAN
+  TRUCK
+}
