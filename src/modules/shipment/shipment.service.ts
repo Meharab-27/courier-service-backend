@@ -381,9 +381,42 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
     throw new Error(`Courier ${courier.name} Is Not In Duty`)
   }
 
+ return await prisma.$transaction(async (tx) => {
   
+    const updatedShipment = await tx.shipment.update({
+      where: {
+        id: shipmentId,
+        version: shipment.version, 
+      },
+      data: {
+        courierId: courier.id,
+        status: 'PICKUP_ASSIGNED',
+        version: { increment: 1 },
+      },
+      include: {
+        courier: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+            courierProfile: {
+              select: {
+                vehicleType: true,
+                vehicleNumber: true,
+                currentZone: true,
+              },
+            },
+          },
+        },
+      },
+    })
 
- }
+ })
+
+
+
+}
 
 
 export const shipmentService = {
