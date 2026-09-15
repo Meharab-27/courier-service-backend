@@ -52,3 +52,7 @@ export interface IPricingCalculationInput {
   isSameZone: boolean;
   isFragile?: boolean;
 }
+
+export interface IAssignCourierPayload {
+  courierId: string; 
+}

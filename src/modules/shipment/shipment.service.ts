@@ -1,3 +1,4 @@
+import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { RequestUser } from "../../middlewares/auth";
 import { ICalculatePricePayload, ICreateShipmentPayload, IShipmentFilterOptions, IUpdateShipmentPayload } from "./shipment.interface";
@@ -335,6 +336,52 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
     }
   });
   return null
+
+ }
+
+
+ const assignCourierToShipmentInDB = async(
+  adminUser : RequestUser,
+  shipmentId:string,
+  courierUserId: string
+ )=>{
+
+  const shipment = await prisma.shipment.findFirst({
+    where : {
+      id : shipmentId, deletedAt: null
+    },
+    include: {
+      originHub: true,
+      destinationHub: true
+    }
+  });
+  if(!shipment){
+    throw new Error("Parcel Not Found");
+  }
+
+  if(shipment.status !== "PAID"){
+    throw new Error(`Only PAID Parcel Can Be Assigned Properly, Current Status : ${shipment.status}`)
+  }
+
+  const courier = await prisma.user.findFirst({
+    where : {
+      id : courierUserId,
+      role:"COURIER",
+      status:"ACTIVE",
+      deletedAt:null
+    },
+    include: {courierProfile: true}
+  });
+
+  if(!courier || !courier.courierProfile){
+    throw new Error("Active Courier Profile Not Found")
+  }
+
+  if(!courier.courierProfile.isAvailable){
+    throw new Error(`Courier ${courier.name} Is Not In Duty`)
+  }
+
+  
 
  }
 
