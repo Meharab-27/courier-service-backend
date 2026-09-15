@@ -4,12 +4,14 @@ import { RequestUser } from "../../middlewares/auth";
 import { ICreateCourierProfilePayload } from "./courier.interface";
 
 const createOrUpdateCourierProfile = async(
-    
     user:RequestUser,
     payload:ICreateCourierProfilePayload,
     files?: { [fieldname: string]: Express.Multer.File[] }
 
 )=>{
+    if (!payload || !payload.hubId) {
+        throw new Error("hubId is required to setup courier profile");
+    }
 
     const existingUser = await prisma.user.findFirst({
         where : {id: user.userId,deletedAt:null},
@@ -84,6 +86,33 @@ const createOrUpdateCourierProfile = async(
     return profile;
 }
 
+
+const getMyCourierProfile = async(userId: string) =>{
+    const profile = await prisma.courierProfile.findUnique({
+        where : {
+            userId
+        },
+        include: {
+            hub:true,
+            user:{
+                select: {
+                    id:true,
+                    name:true,
+                    email:true,
+                    phone:true,
+                    status:true
+                }
+            }
+        }
+    });
+
+    if(!profile){
+        throw new Error("Courier Profile Didn't Created Yet")
+    }
+    return profile
+}
+
 export const courierService = {
-    createOrUpdateCourierProfile
+    createOrUpdateCourierProfile,
+    getMyCourierProfile
 }

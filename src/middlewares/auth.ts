@@ -45,11 +45,7 @@ export const auth = (...requiredRoles: Role[]) => {
       throw new Error(verifiedToken.error || "Invalid or expired token.");
     }
 
-    const { email, name, id, role } = verifiedToken.data as JwtPayload;
-
-    if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
-      throw new Error("Forbidden. You do not have permission to access this resource.");
-    }
+    const { id } = verifiedToken.data as JwtPayload;
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -61,6 +57,10 @@ export const auth = (...requiredRoles: Role[]) => {
 
     if (user.deletedAt) {
       throw new Error("Your account has been deactivated. Please contact support.");
+    }
+
+    if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
+      throw new Error("Forbidden. You do not have permission to access this resource.");
     }
 
     req.user = {

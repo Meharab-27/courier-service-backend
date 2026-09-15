@@ -11,6 +11,7 @@ import { hubRoutes } from "./modules/hub/hub.routes";
 import { shipmentRoutes } from "./modules/shipment/shipment.route";
 import { paymentController } from "./modules/payment/payment.controller";
 import { paymentRoutes } from "./modules/payment/payment.route";
+import { courierRoutes } from "./modules/courier/courier.route";
 
 const app: Application = express();
 
@@ -42,11 +43,12 @@ app.get("/", (req: Request, res: Response) => {
 
 // Application API routes
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/customers", customerRoutes);
-app.use("/api/hubs",hubRoutes);
-app.use("/api/shipments",shipmentRoutes);
-app.use('/api/payments',paymentRoutes)
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/customers", customerRoutes);
+app.use("/api/v1/hubs",hubRoutes);
+app.use("/api/v1/shipments",shipmentRoutes);
+app.use('/api/v1/payments',paymentRoutes);
+app.use('/api/v1/courier',courierRoutes)
 
 // 404 Route Handler
 app.use((req: Request, res: Response) => {
