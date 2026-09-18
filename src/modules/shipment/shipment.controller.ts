@@ -105,6 +105,25 @@ const deleteShipment= catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const assignCourier = catchAsync(async(req:Request,res:Response)=>{
+  
+
+  const {courierId} = req.body;
+  if(!courierId){
+    throw new Error("Courier Id Is Mandatory")
+  }
+
+  const {id} = req.params;
+  if(!id || Array.isArray(id)){
+    throw new Error("Shipment Id Is Required")
+  }
+
+  const result = await shipmentService.assignCourierToShipmentInDB(req.user!,id,courierId)
+
+
+})
+
 export const shipmentController = {
     calculatePrice,
     createShipment,
@@ -112,5 +131,6 @@ export const shipmentController = {
     getShipmentById,
     updateShipment,
     cancelShipment,
-    deleteShipment
+    deleteShipment,
+    assignCourier
 }

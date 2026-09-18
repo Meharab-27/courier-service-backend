@@ -27,6 +27,11 @@ router.post('/:id/cancel',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.canc
 
 router.delete('/:id',auth(Role.CUSTOMER,Role.ADMIN),shipmentController.deleteShipment)
 
+router.post(
+  '/:id/assign-courier',
+  shipmentController.assignCourier
+);
+
 
 
 export const shipmentRoutes = router

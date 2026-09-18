@@ -410,7 +410,28 @@ const isSameZone = originHub.zone.toLowerCase() === destHub.zone.toLowerCase()
           },
         },
       },
-    })
+    });
+
+
+    await tx.courierProfile.update({
+      where : {userId : courier.id},
+      data: {
+        activeDeliveries: {increment : 1}
+      }
+    });
+
+    await tx.shipmentLog.create({
+      data : {
+        shipmentId:shipment.id,
+        fromStatus:"PAID",
+        toStatus: "PICKUP_ASSIGNED",
+        performedById:adminUser.userId,
+        remarks:`Courier has Been Given The Duty Of '${courier.name} By Admin'`
+
+      }
+    });
+
+    return updatedShipment
 
  })
 
@@ -426,5 +447,6 @@ export const shipmentService = {
     getShipmentByIdFromDB,
     updateShipmentInDB,
     cancelShipmentInDB,
-    softDeleteShipmentInDB
+    softDeleteShipmentInDB,
+    assignCourierToShipmentInDB
 }
